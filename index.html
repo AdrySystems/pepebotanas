@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PEPE BOTANAS - Menú Digital Restaurante Familiar</title>
+
+    <!-- Tailwind CSS with Custom Design Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            700: '#2a4365',
+                            800: '#1b365d',
+                            900: '#0a192f',
+                            950: '#050c18',
+                        },
+                        gold: {
+                            300: '#f7e7a9',
+                            400: '#e6ca65',
+                            500: '#d4af37',
+                            600: '#b89228',
+                            700: '#8c6b18'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Base typography and touch optimizations */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Custom scrollbars */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Glassmorphism Header */
+        .glass-light {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .glass-dark {
+            background: rgba(10, 25, 47, 0.94);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
+        .img-hover-effect {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .product-card:hover .img-hover-effect {
+            transform: scale(1.07);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 dark:bg-navy-950 dark:text-slate-100 transition-colors duration-300 min-h-screen pb-12 antialiased selection:bg-gold-500 selection:text-navy-950">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 transition-colors duration-300 glass-light dark:glass-dark border-b border-slate-200 dark:border-navy-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+            
+            <!-- Restaurant Logo & Title -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetFilters()">
+                <div class="w-10 h-10 rounded-xl bg-navy-900 dark:bg-gold-500 flex items-center justify-center text-gold-400 dark:text-navy-950 shadow-md font-bold border border-gold-500/40">
+                    <i class="fa-solid fa-utensils text-base"></i>
+                </div>
+                <div>
+                    <h1 class="serif-font font-bold text-lg sm:text-2xl text-navy-900 dark:text-white tracking-wide leading-none">
+                        PEPE BOTANAS
+                    </h1>
+                    <p class="text-[10px] sm:text-xs font-bold text-gold-600 dark:text-gold-400 uppercase tracking-widest mt-0.5">
+                        Restaurante Familiar
+                    </p>
+                </div>
+            </div>
+
+            <!-- Header Controls: Theme Switch -->
+            <div class="flex items-center space-x-2">
+                <button id="theme-toggle" aria-label="Cambiar tema" class="flex items-center space-x-2 px-3 py-2 rounded-xl bg-slate-200/80 dark:bg-navy-800 text-navy-900 dark:text-gold-400 hover:bg-slate-300 dark:hover:bg-navy-700 transition-all border border-slate-300/50 dark:border-navy-700 shadow-sm">
+                    <i id="theme-toggle-dark-icon" class="fa-solid fa-moon text-sm hidden"></i>
+                    <i id="theme-toggle-light-icon" class="fa-solid fa-sun text-sm hidden"></i>
+                    <span id="theme-label" class="text-xs font-semibold hidden sm:inline">Modo</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Real-Time Search Bar -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-3">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="search-input" placeholder="Buscar tostadas, camarones, piña colada, postres..." class="w-full pl-10 pr-10 py-2.5 rounded-xl text-xs sm:text-sm bg-white dark:bg-navy-900 text-slate-900 dark:text-white placeholder-slate-400 border border-slate-200 dark:border-navy-800 focus:border-gold-500 dark:focus:border-gold-500 focus:outline-none transition-all shadow-inner">
+                <button id="clear-search" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sticky Horizontal Category Navigation -->
+        <div class="border-t border-slate-200/80 dark:border-navy-800/80 bg-slate-50/80 dark:bg-navy-900/80">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+                <div id="category-pills" class="flex space-x-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5">
+                    <!-- Categories dynamic insertion -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5">
+        
+        <!-- Executive Welcome Banner -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy-900 via-navy-800 to-navy-950 text-white p-5 sm:p-7 mb-6 shadow-xl border border-gold-500/30">
+            <div class="relative z-10 max-w-2xl">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-gold-500/20 border border-gold-500/40 text-gold-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-2">
+                    <i class="fa-solid fa-users text-[10px] mr-1.5"></i> Ambiente 100% Familiar
+                </span>
+                <h2 class="serif-font text-2xl sm:text-3xl font-bold text-white mb-1.5 leading-tight">
+                    Sabor Tradicional y Mariscos Frescos
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+                    Mariscos preparados al momento, platillos de la casa, bebidas refrescantes y botanas para compartir en familia.
+                </p>
+            </div>
+            <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-25 pointer-events-none bg-cover bg-center hidden sm:block" style="background-image: url('https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1000&q=80');"></div>
+        </div>
+
+        <!-- Section Bar Header -->
+        <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-200 dark:border-navy-800">
+            <h3 id="category-title" class="serif-font text-lg sm:text-2xl font-bold text-navy-900 dark:text-white flex items-center gap-2">
+                <span>Platillos</span>
+            </h3>
+            <span id="items-count" class="text-xs font-bold px-3 py-1 rounded-full bg-white dark:bg-navy-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-navy-700 shadow-sm">
+                0 productos
+            </span>
+        </div>
+
+        <!-- Product Cards Grid: Exactly 2 columns on mobile, 3 on tablet, 4 on desktop -->
+        <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
+            <!-- Dynamic product cards populated via JS -->
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="no-results" class="hidden py-16 text-center">
+            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-white dark:bg-navy-800 flex items-center justify-center text-slate-400 border border-slate-200 dark:border-navy-700 text-2xl">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <h4 class="text-base font-bold text-navy-900 dark:text-white mb-1">No se encontraron productos</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">Intenta buscar con otros términos o cambia la categoría seleccionada.</p>
+        </div>
+    </main>
+
+    <!-- Product Detail Fullscreen Modal -->
+    <div id="product-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-navy-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 transition-opacity duration-300 opacity-0">
+        <div id="modal-card" class="relative w-full max-w-lg rounded-2xl bg-white dark:bg-navy-900 shadow-2xl overflow-hidden border border-slate-200 dark:border-navy-800 transform scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
+            
+            <!-- Modal Close Button -->
+            <button id="close-modal" aria-label="Cerrar vista" class="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-navy-950/70 hover:bg-navy-950 text-white flex items-center justify-center transition-colors backdrop-blur-sm border border-white/20">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+
+            <!-- Modal Fixed Aspect Ratio Image Area -->
+            <div class="relative w-full aspect-video bg-navy-950 flex-shrink-0 overflow-hidden">
+                <img id="modal-img" src="" alt="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-navy-950/80 via-transparent to-transparent"></div>
+                
+                <span id="modal-category" class="absolute bottom-3 left-4 px-2.5 py-1 rounded-md bg-gold-500 text-navy-950 font-bold text-[10px] uppercase tracking-wider shadow-md">
+                    Categoría
+                </span>
+            </div>
+
+            <!-- Modal Content Section -->
+            <div class="p-5 sm:p-6 overflow-y-auto flex-1">
+                <h3 id="modal-title" class="serif-font text-xl sm:text-2xl font-bold text-navy-900 dark:text-white leading-tight mb-2">
+                    Nombre del Producto
+                </h3>
+
+                <!-- Modal Pricing Box -->
+                <div class="my-4 p-3.5 rounded-xl bg-slate-50 dark:bg-navy-800/80 border border-slate-200 dark:border-navy-700">
+                    <span class="block text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-2 tracking-wider">
+                        Precios y Variedades Disponibles:
+                    </span>
+                    <div id="modal-prices" class="flex flex-wrap gap-2">
+                        <!-- Price tags inserted here -->
+                    </div>
+                </div>
+
+                <p id="modal-description" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Descripción detallada del platillo...
+                </p>
+
+                <div class="mt-6 pt-4 border-t border-slate-100 dark:border-navy-800 flex items-center justify-between">
+                    <div class="flex items-center text-xs text-gold-600 dark:text-gold-400 font-semibold">
+                        <i class="fa-solid fa-shield-heart mr-1.5"></i> Calidad Garantizada
+                    </div>
+                    <button onclick="closeProductModal()" class="px-5 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-navy-950 font-bold text-xs sm:text-sm transition-all shadow-md">
+                        Cerrar Detalle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Categories Definition
+        const categories = [
+            { id: 'platillos', name: 'Platillos', icon: 'fa-utensils' },
+            { id: 'bebidas', name: 'Bebidas', icon: 'fa-glass-water' },
+            { id: 'cervezas', name: 'Cervezas y Refrescos', icon: 'fa-beer-foam-of-beer' },
+            { id: 'mezcal', name: 'Mezcal', icon: 'fa-whiskey-glass' },
+            { id: 'dulces', name: 'Dulces', icon: 'fa-candy-cane' },
+            { id: 'postres', name: 'Postres', icon: 'fa-ice-cream' }
+        ];
+
+        // Complete 100% Comprehensive Product Inventory with Verified Real Food Imagery
+        const products = [
+            // ==================== PLATILLOS ====================
+            {
+                id: 'tostada-ceviche',
+                category: 'platillos',
+                name: 'Tostada de Ceviche de Pescado',
+                prices: [20, 28, 40],
+                description: 'Tostada crujiente con ceviche fresco de pescado blanco curado en limón, jitomate, cebolla, cilantro y finas láminas de aguacate.',
+                image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'tostada-camaron',
+                category: 'platillos',
+                name: 'Tostada de Camarón',
+                prices: [40, 55, 60],
+                description: 'Tostada dorada repleta de camarones frescos marinados al limón con verduras de la milpa y aguacate.',
+                image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'tostada-pulpo-mixta',
+                category: 'platillos',
+                name: 'Tostada de Pulpo / Mixta / Especial',
+                prices: [55, 75, 85],
+                description: 'Deliciosa combinación de pulpo tierno y camarón con salsa casera, salsa negra de la casa y aguacate.',
+                image: 'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'camarones-preparados',
+                category: 'platillos',
+                name: 'Camarones (Empanizados / Ajillo / Diabla / Mojo de Ajo)',
+                prices: [150, 180, 200, 250],
+                description: 'Camarones grandes preparados a tu gusto: empanizados crujientes, bañados en salsa a la diabla picante, al mojo de ajo dorado o al ajillo guajillo.',
+                image: 'https://images.unsplash.com/photo-1559737671-da09259d5641?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'camarones-cucaracha',
+                category: 'platillos',
+                name: 'Camarones Estilo Cucaracha',
+                prices: [180, 250],
+                description: 'Camarones enteros fritos con cascara súper crujiente y sazonados con salsa especial picante agridulce.',
+                image: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'filete-pescado',
+                category: 'platillos',
+                name: 'Filete de Pescado (Plancha / Empanizado / Mojo de Ajo / Zarandeado)',
+                prices: [170, 190, 200],
+                description: 'Jugoso filete de pescado fresco servido a la plancha, empanizado, al mojo de ajo o zarandeado con arroz y ensalada.',
+                image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'caldo-pescado-camaron',
+                category: 'platillos',
+                name: 'Caldo de Pescado / Camarón / Mixto',
+                prices: [160, 170, 190],
+                description: 'Caldo marinero reconfortante con camarones, filete de pescado, zanahorias, papas y especias tradicionales.',
+                image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'coctel-camaron',
+                category: 'platillos',
+                name: 'Cóctel de Camarón (Mediano / Grande)',
+                prices: [140, 160, 180],
+                description: 'Cóctel clásico en copa marinera con abundante camarón, jugo de tomate, cebolla, cilantro, aguacate y galletas saladas.',
+                image: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'aguachile-verde-negro',
+                category: 'platillos',
+                name: 'Aguachile de Camarón (Verde / Negro)',
+                prices: [170, 200, 500],
+                description: 'Camarones abrillantados curados en limón fresco con potente salsa verde de chiltepín o salsa negra especial con pepino y cebolla morada.',
+                image: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'torre-mariscos',
+                category: 'platillos',
+                name: 'Torre de Mariscos Especial',
+                prices: [250, 350],
+                description: 'Impresionante torre gastronómica montada con capas de ceviche, camarón cocido, camarón curtido, pulpo y aguacate con salsas negras.',
+                image: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'charola-familiar',
+                category: 'platillos',
+                name: 'Charola Familiar de Mariscos',
+                prices: [350, 500, 700, 1100],
+                description: 'Gran banquete al centro para compartir en familia. Incluye variedad de camarones, pulpo, ceviches, ostiones y botanas marinera.',
+                image: 'https://images.unsplash.com/photo-1559737671-da09259d5641?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'ostiones-almejas',
+                category: 'platillos',
+                name: 'Ostiones en su Concha y Almeja Rey',
+                prices: [110, 120, 220],
+                description: 'Ostiones frescos servidos en su concha sobre cama de hielo o almeja rey con limón y salsa picante.',
+                image: 'https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'tiritas-pescado',
+                category: 'platillos',
+                name: 'Tiritas de Pescado Marinadas',
+                prices: [120, 150],
+                description: 'Finas tiritas de pescado fresco marinado en jugo de limón recién exprimido con cebolla morada y chile verde.',
+                image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'pulpo-zarandeado',
+                category: 'platillos',
+                name: 'Pulpo Zarandeado a las Brasas',
+                prices: [250, 350],
+                description: 'Pulpo entero tierno adobado con chile guajillo y marinados asado suavemente a la parrilla.',
+                image: 'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'mojarra-frita',
+                category: 'platillos',
+                name: 'Mojarra Frita al Gusto',
+                prices: [160, 180],
+                description: 'Mojarra entera frita crujiente al mojo de ajo o a la diabla, servida con ensalada fresca y arroz.',
+                image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'arrachera-parrilla',
+                category: 'platillos',
+                name: 'Arrachera a la Parrilla',
+                prices: [220, 250, 270],
+                description: 'Jugosa arrachera asada a las brasas acompañada de nopales, cebollitas cambray, guacamole y frijoles refritos.',
+                image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'carne-apache',
+                category: 'platillos',
+                name: 'Carne Apache Tradicional',
+                prices: [120, 160],
+                description: 'Carne de res molida marinada en jugo de limón fresco con jitomate, cebolla, cilantro y chile verde.',
+                image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'pechuga-pollo',
+                category: 'platillos',
+                name: 'Pechuga de Pollo (Empanizada / Plancha)',
+                prices: [180],
+                description: 'Pechuga de pollo tierna a la plancha o empanizada con crujientes papas a la francesa.',
+                image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'alitas-bbq-bufalo',
+                category: 'platillos',
+                name: 'Alitas de Pollo BBQ / Búfalo',
+                prices: [120],
+                description: 'Alitas bien doraditas bañadas en salsa BBQ dulce o salsa búfalo picante con aderezo ranch.',
+                image: 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'molcajete-mar-tierra',
+                category: 'platillos',
+                name: 'Molcajete Mar y Tierra',
+                prices: [280, 350],
+                description: 'Molcajete de piedra hirviendo con salsa molcajeteada, arrachera, camarones, queso fundido y nopales.',
+                image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'plato-botanero',
+                category: 'platillos',
+                name: 'Plato Botanero Mixto',
+                prices: [200, 300],
+                description: 'Variedad de botanas: alitas, nuggets, papas fritas, aros de cebolla y quesadillas.',
+                image: 'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'nuggets-papas',
+                category: 'platillos',
+                name: 'Nuggets de Pollo con Papas Fritas',
+                prices: [110, 120],
+                description: 'Crujientes nuggets de pechuga de pollo acompañados de papas fritas al punto.',
+                image: 'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'sopa-arroz',
+                category: 'platillos',
+                name: 'Sopa de Arroz Casera',
+                prices: [25],
+                description: 'Porción individual de arroz rojo tradicional sazonado al estilo casero.',
+                image: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'consome-pescado',
+                category: 'platillos',
+                name: 'Consomé Caliente de la Casa',
+                prices: [25],
+                description: 'Taza de consomé marinero bien caliente con cilantro y cebolla picada.',
+                image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80'
+            },
+
+            // ==================== BEBIDAS ====================
+            {
+                id: 'pina-colada',
+                category: 'bebidas',
+                name: 'Piña Colada (Virgen / Con Alcohol)',
+                prices: [70, 100],
+                description: 'Refrescante bebida batida con crema de coco, jugo de piña concentrado, hielo frappé y cereza.',
+                image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'michelada-preparada',
+                category: 'bebidas',
+                name: 'Michelada Preparada Escarchada',
+                prices: [50, 80, 100],
+                description: 'Vaso escarchado con chamoy, sal y chile, sazonado con jugo de limón y mezcla de salsas.',
+                image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'mentirosa-citrica',
+                category: 'bebidas',
+                name: 'Mentirosa Cítrica',
+                prices: [50],
+                description: 'Bebida cítrica ultra refrescante con jugo de toronja, limón, agua mineral y sal.',
+                image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'azulito-gnomo',
+                category: 'bebidas',
+                name: 'Azulito / Gnomo Azul (Sin / Con Alcohol)',
+                prices: [70, 100],
+                description: 'Divertida bebida azul escarchada con chamoy azul, chile en polvo, soda de lima y gomitas.',
+                image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'pantera-rc',
+                category: 'bebidas',
+                name: 'Pantera Rosa RC',
+                prices: [70, 100],
+                description: 'Mezcla cremosa de granadina, crema dulce y toque frutal servido en frappé.',
+                image: 'https://images.unsplash.com/photo-1497534446932-c925b458314e?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'pinguino-especial',
+                category: 'bebidas',
+                name: 'Pingüino Especial de la Casa',
+                prices: [70, 100],
+                description: 'Exclusiva combinación de sabores cítricos y mentados súper helados.',
+                image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'clamato-preparado',
+                category: 'bebidas',
+                name: 'Clamato Preparado Especial',
+                prices: [30, 40],
+                description: 'Jugo de clamato helado preparado con limón, salsas inglesas, maggi, pimienta y apio.',
+                image: 'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'margarita-clasica',
+                category: 'bebidas',
+                name: 'Margarita Clásica de Limón',
+                prices: [80],
+                description: 'Copa martinera escarchada con sal, licor de naranja, jugo de limón fresco y tequila.',
+                image: 'https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'mojito-hierbabuena',
+                category: 'bebidas',
+                name: 'Mojito de Hierbabuena Fresca',
+                prices: [70],
+                description: 'Hojas de hierbabuena maceradas con azúcar, jugo de limón exprimido y agua mineral.',
+                image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'naranjada-limonada',
+                category: 'bebidas',
+                name: 'Naranjada / Limonada (Natural o Mineral)',
+                prices: [50],
+                description: 'Jugo de fruta 100% natural servido con agua mineral o natural bien fría.',
+                image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'agua-fresca',
+                category: 'bebidas',
+                name: 'Agua Fresca del Día (Vaso / Jarra)',
+                prices: [25, 50, 80],
+                description: 'Agua de fruta natural preparada diariamente (Horchata, Jamaica, Tamarindo).',
+                image: 'https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'shot-tequila',
+                category: 'bebidas',
+                name: 'Shot de Tequila Reposado',
+                prices: [70, 80, 90],
+                description: 'Caballito de tequila reposado de primera calidad con limón y sal.',
+                image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80'
+            },
+
+            // ==================== CERVEZAS Y REFRESCOS ====================
+            {
+                id: 'cervezas-nacionales',
+                category: 'cervezas',
+                name: 'Cerveza Nacional (Victoria, Corona, Modelo Especial, Negra Modelo, Estrella, Indio)',
+                prices: [30, 35, 70],
+                description: 'Cerveza helada en botella de vidrio de 355ml o media.',
+                image: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'coronita-extra',
+                category: 'cervezas',
+                name: 'Coronita / Corona Extra',
+                prices: [25, 35],
+                description: 'Cerveza Corona bien helada en presentación coronita o media.',
+                image: 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'caguama-familiar',
+                category: 'cervezas',
+                name: 'Caguama Familiar (Victoria / Corona)',
+                prices: [60],
+                description: 'Presentación grande familiar de 940ml bien helada.',
+                image: 'https://images.unsplash.com/photo-1608270586620-248524c67de9?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'new-mix',
+                category: 'cervezas',
+                name: 'New Mix Preparado',
+                prices: [35],
+                description: 'Lata de New Mix sabor paloma o vampiro súper helado.',
+                image: 'https://images.unsplash.com/photo-1584225065152-4a1454aa3d4e?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'cubetazo-cerveza',
+                category: 'cervezas',
+                name: 'Cubetazo de Cervezas (6 piezas)',
+                prices: [300, 350],
+                description: 'Cubeta metálica con 6 cervezas heladas sumergidas en abundante hielo.',
+                image: 'https://images.unsplash.com/photo-1584225065152-4a1454aa3d4e?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'refrescos-familia',
+                category: 'cervezas',
+                name: 'Refrescos (Coca-Cola, Pepsi, Squirt, Manzanita, Mirinda, Sangría, Volt)',
+                prices: [20, 25, 30],
+                description: 'Refresco embotellado de 355ml o 600ml helado.',
+                image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'agua-mineral',
+                category: 'cervezas',
+                name: 'Agua Mineral (Peñafiel / Ciel)',
+                prices: [25],
+                description: 'Botella de agua mineral con gas purificada.',
+                image: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'agua-natural',
+                category: 'cervezas',
+                name: 'Agua Natural Purificada',
+                prices: [15, 18],
+                description: 'Botella de agua purificada embotellada.',
+                image: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'jugos-jumex',
+                category: 'cervezas',
+                name: 'Jugos Jumex en Lata',
+                prices: [15, 25],
+                description: 'Lata de jugo sabor durazno, mango o manzana.',
+                image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=800&q=80'
+            },
+
+            // ==================== MEZCAL ====================
+            {
+                id: 'shot-mezcal',
+                category: 'mezcal',
+                name: 'Shot de Mezcal Artesanal',
+                prices: [50],
+                description: 'Shot de mezcal servido con rodajas de naranja fresca y sal de gusano de maguey.',
+                image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'botella-mezcal',
+                category: 'mezcal',
+                name: 'Botella de Mezcal Regional Artesanal',
+                prices: [120, 300],
+                description: 'Botella o media botella de mezcal artesanal 100% maguey de la región.',
+                image: 'https://images.unsplash.com/photo-1527281400683-1aae777175f8?auto=format&fit=crop&w=800&q=80'
+            },
+
+            // ==================== DULCES ====================
+            {
+                id: 'pelon-pelo-rico',
+                category: 'dulces',
+                name: 'Pelón Pelo Rico',
+                prices: [10],
+                description: 'Clásico dulce de tamarindo con toque acidito y picante.',
+                image: 'https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'krankis',
+                category: 'dulces',
+                name: 'Krankis',
+                prices: [20],
+                description: 'Crujientes hojuelas de maíz cubiertas de delicioso chocolate de leche.',
+                image: 'https://images.unsplash.com/photo-1581798459219-318e76aecc7b?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'gomitas-chile',
+                category: 'dulces',
+                name: 'Gomitas Preparadas con Chile y Chamoy',
+                prices: [20],
+                description: 'Gomitas de sabores cubiertas en chamoy especial y miguelito.',
+                image: 'https://images.unsplash.com/photo-1582058091505-f87a2e55a40f?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'bubulubu',
+                category: 'dulces',
+                name: 'Bubulubu',
+                prices: [15],
+                description: 'Malvavisco suave con jalea de fresa cubierto de chocolate.',
+                image: 'https://images.unsplash.com/photo-1581798459219-318e76aecc7b?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'chocolates-variados',
+                category: 'dulces',
+                name: 'Chocolates de Barra',
+                prices: [15],
+                description: 'Barra de chocolate macizo o relleno.',
+                image: 'https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&w=800&q=80'
+            },
+
+            // ==================== POSTRES ====================
+            {
+                id: 'fresas-crema',
+                category: 'postres',
+                name: 'Fresas con Crema Artesanales',
+                prices: [45],
+                description: 'Fresas frescas desinfectadas servidas en vaso con crema dulce casera, canela y nuez.',
+                image: 'https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?auto=format&fit=crop&w=800&q=80'
+            },
+            {
+                id: 'carlota-limon',
+                category: 'postres',
+                name: 'Carlota de Limón Helada',
+                prices: [25],
+                description: 'Postre casero frío hecho con capas de galleta María y crema helada de limón.',
+                image: 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80'
+            }
+        ];
+
+        // State variables
+        let currentCategory = 'platillos';
+        let searchQuery = '';
+
+        // DOM Element Cache
+        const categoryPillsContainer = document.getElementById('category-pills');
+        const productsGrid = document.getElementById('products-grid');
+        const categoryTitle = document.getElementById('category-title');
+        const itemsCount = document.getElementById('items-count');
+        const searchInput = document.getElementById('search-input');
+        const clearSearchBtn = document.getElementById('clear-search');
+        const noResults = document.getElementById('no-results');
+
+        // Modal Elements
+        const modal = document.getElementById('product-modal');
+        const modalCard = document.getElementById('modal-card');
+        const modalImg = document.getElementById('modal-img');
+        const modalCategory = document.getElementById('modal-category');
+        const modalTitle = document.getElementById('modal-title');
+        const modalPrices = document.getElementById('modal-prices');
+        const modalDescription = document.getElementById('modal-description');
+        const closeModalBtn = document.getElementById('close-modal');
+
+        // Theme Toggle Elements
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function initApp() {
+            setupTheme();
+            renderCategoryPills();
+            renderProducts();
+            setupEventListeners();
+        }
+
+        function resetFilters() {
+            currentCategory = 'platillos';
+            searchQuery = '';
+            searchInput.value = '';
+            clearSearchBtn.classList.add('hidden');
+            renderCategoryPills();
+            renderProducts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Render Horizontal Category Filter Tabs
+        function renderCategoryPills() {
+            categoryPillsContainer.innerHTML = categories.map(cat => {
+                const isActive = cat.id === currentCategory && !searchQuery;
+                return `
+                    <button 
+                        onclick="selectCategory('${cat.id}')"
+                        class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-2 ${
+                            isActive 
+                            ? 'bg-navy-900 text-gold-400 dark:bg-gold-500 dark:text-navy-950 shadow-md scale-105' 
+                            : 'bg-white text-slate-600 dark:bg-navy-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-700 border border-slate-200/80 dark:border-navy-700'
+                        }"
+                    >
+                        <i class="fa-solid ${cat.icon} text-xs"></i>
+                        <span>${cat.name}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectCategory(catId) {
+            currentCategory = catId;
+            searchQuery = '';
+            searchInput.value = '';
+            clearSearchBtn.classList.add('hidden');
+            renderCategoryPills();
+            renderProducts();
+        }
+
+        function formatPrices(prices) {
+            if (!prices || prices.length === 0) return '';
+            if (prices.length === 1) {
+                return `<span class="text-navy-900 dark:text-gold-400 font-bold text-sm sm:text-base">$${prices[0]} <span class="text-[10px] font-normal text-slate-400">MXN</span></span>`;
+            } else {
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+                return `<span class="text-navy-900 dark:text-gold-400 font-bold text-xs sm:text-sm">$${min} - $${max}</span>`;
+            }
+        }
+
+        function renderProducts() {
+            let filtered = products;
+
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase().trim();
+                filtered = products.filter(p => 
+                    p.name.toLowerCase().includes(query) || 
+                    p.description.toLowerCase().includes(query)
+                );
+                categoryTitle.innerHTML = `<span>Resultados para "${searchQuery}"</span>`;
+            } else {
+                filtered = products.filter(p => p.category === currentCategory);
+                const currentCatObj = categories.find(c => c.id === currentCategory);
+                categoryTitle.innerHTML = `<i class="fa-solid ${currentCatObj.icon} text-gold-500 text-lg"></i> <span>${currentCatObj.name}</span>`;
+            }
+
+            itemsCount.textContent = `${filtered.length} ${filtered.length === 1 ? 'producto' : 'productos'}`;
+
+            if (filtered.length === 0) {
+                productsGrid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+
+            productsGrid.innerHTML = filtered.map((prod, index) => `
+                <div 
+                    onclick="openProductModal('${prod.id}')"
+                    class="product-card group cursor-pointer bg-white dark:bg-navy-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-navy-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between animate-fade-in"
+                    style="animation-delay: ${Math.min(index * 0.02, 0.3)}s"
+                >
+                    <div>
+                        <!-- Strictly Enforced Uniform 16:9 Image Aspect Ratio Container -->
+                        <div class="relative w-full aspect-video overflow-hidden bg-navy-950">
+                            <img 
+                                src="${prod.image}" 
+                                alt="${prod.name}" 
+                                loading="lazy"
+                                onerror="this.onerror=null; this.src='https://placehold.co/600x400/0a192f/ffffff?text=PEPE+BOTANAS';"
+                                class="img-hover-effect w-full h-full object-cover"
+                            >
+                            <div class="absolute inset-0 bg-gradient-to-t from-navy-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            
+                            ${prod.prices.length > 1 ? `
+                                <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-navy-950/80 backdrop-blur-md text-white text-[9px] font-semibold border border-white/10">
+                                    ${prod.prices.length} opciones
+                                </span>
+                            ` : ''}
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="p-3 sm:p-4">
+                            <h4 class="font-bold text-xs sm:text-sm text-navy-900 dark:text-white line-clamp-2 leading-snug group-hover:text-gold-600 dark:group-hover:text-gold-400 transition-colors">
+                                ${prod.name}
+                            </h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                                ${prod.description}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer -->
+                    <div class="p-3 sm:p-4 pt-0 flex items-center justify-between border-t border-slate-100 dark:border-navy-800/80 mt-2">
+                        <div>
+                            <span class="text-[9px] text-slate-400 block uppercase font-bold tracking-wider">Precio</span>
+                            ${formatPrices(prod.prices)}
+                        </div>
+                        <div class="w-7 h-7 rounded-full bg-slate-100 dark:bg-navy-800 text-navy-900 dark:text-gold-400 flex items-center justify-center group-hover:bg-gold-500 group-hover:text-navy-950 transition-colors shadow-sm">
+                            <i class="fa-solid fa-expand text-[10px]"></i>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openProductModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const categoryObj = categories.find(c => c.id === product.category);
+
+            modalImg.src = product.image;
+            modalImg.alt = product.name;
+            modalCategory.textContent = categoryObj ? categoryObj.name : 'Restaurante';
+            modalTitle.textContent = product.name;
+            modalDescription.textContent = product.description;
+
+            modalPrices.innerHTML = product.prices.map(price => `
+                <span class="px-3 py-1.5 rounded-lg bg-white dark:bg-navy-950 border border-gold-500/40 text-navy-900 dark:text-gold-400 font-bold text-xs sm:text-sm shadow-sm flex items-center gap-1">
+                    <span class="text-[10px] text-slate-400 font-normal">$</span>${price} <span class="text-[10px] text-slate-400 font-normal">MXN</span>
+                </span>
+            `).join('');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalCard.classList.remove('scale-95');
+                modalCard.classList.add('scale-100');
+            }, 10);
+
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeProductModal() {
+            modal.classList.add('opacity-0');
+            modalCard.classList.remove('scale-100');
+            modalCard.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 250);
+        }
+
+        function setupEventListeners() {
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value;
+                if (searchQuery) {
+                    clearSearchBtn.classList.remove('hidden');
+                } else {
+                    clearSearchBtn.classList.add('hidden');
+                }
+                renderCategoryPills();
+                renderProducts();
+            });
+
+            clearSearchBtn.addEventListener('click', () => {
+                searchQuery = '';
+                searchInput.value = '';
+                clearSearchBtn.classList.add('hidden');
+                renderCategoryPills();
+                renderProducts();
+            });
+
+            closeModalBtn.addEventListener('click', closeProductModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeProductModal();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    closeProductModal();
+                }
+            });
+
+            themeToggleBtn.addEventListener('click', toggleTheme);
+        }
+
+        // Theme Configuration (Light Mode by Default)
+        function setupTheme() {
+            const savedTheme = localStorage.getItem('pepe-menu-theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.add('light');
+                document.documentElement.classList.remove('dark');
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                localStorage.setItem('pepe-menu-theme', 'light');
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                localStorage.setItem('pepe-menu-theme', 'dark');
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            }
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
